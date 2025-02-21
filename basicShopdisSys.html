@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Discount System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Our Shop!</h1>
+        <button onclick="getCoupon()">Get Your Coupon</button>
+        <button onclick="getDiscount()">Get Your Discount</button>
+        
+        <div id="couponSection" class="hidden">
+            <h2>Your Discount Coupon</h2>
+            <p id="couponValue"></p>
+            <p>To redeem this coupon on our cash counter, follow us on our social media:</p>
+            <p>
+                <a href="#" onclick="openLinks('facebook')">Facebook</a> |
+                <a href="#" onclick="openLinks('tiktok')">Tiktok</a>
+            </p>
+            <input type="checkbox" id="followCheck" onclick="verifyFollow()"> I have followed both accounts
+            <p id="followStatus"></p>
+        </div>
+
+        <div id="discountSection" class="hidden">
+            <h2>Enter Your Purchase Amount</h2>
+            <input type="number" id="purchaseAmount" placeholder="Enter amount">
+            <button onclick="calculateDiscount()">Get Discount</button>
+            <p id="discountValue"></p>
+        </div>
+    </div>
+    
+    <script>
+        function getCoupon() {
+            document.getElementById('couponSection').classList.remove('hidden');
+            let discount = Math.floor(Math.random() * (50 - 10 + 1)) + 10;
+            document.getElementById('couponValue').innerText = `You got ${discount} BDT discount!`;
+        }
+
+        function openLinks(platform) {
+            if (platform === 'facebook') {
+                window.open('https://facebook.com', '_blank');
+            } else if (platform === 'tiktok') {
+                window.open('https://tiktok.com', '_blank');
+            }
+        }
+
+        function verifyFollow() {
+            if (document.getElementById('followCheck').checked) {
+                document.getElementById('followStatus').innerText = 'Successfully followed and ready to redeem!';
+            } else {
+                document.getElementById('followStatus').innerText = 'Please follow us';
+            }
+        }
+
+        function getDiscount() {
+            document.getElementById('discountSection').classList.remove('hidden');
+        }
+
+        function calculateDiscount() {
+            let amount = parseInt(document.getElementById('purchaseAmount').value);
+            let discount = 0;
+            let min = 0, max = 0;
+            
+            if (amount < 1000) {
+                min = 10; max = 50;
+            } else if (amount <= 1500) {
+                min = 10; max = 100;
+            } else if (amount <= 2500) {
+                min = 50; max = 150;
+            } else if (amount <= 3500) {
+                min = 100; max = 200;
+            } else if (amount <= 5000) {
+                min = 150; max = 250;
+            } else if (amount <= 8000) {
+                min = 250; max = 350;
+            } else if (amount <= 12000) {
+                min = 250; max = 450;
+            } else {
+                min = 300; max = 500;
+            }
+
+            discount = Math.floor(Math.random() * (max - min + 1)) + min;
+            document.getElementById('discountValue').innerText = `You got ${discount} BDT discount!`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Discount & Coupon</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+            padding: 20px;
+        }
+        .btn {
+            display: block;
+            width: 80%;
+            padding: 15px;
+            margin: 10px auto;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .coupon-btn { background-color: #ff6600; color: white; }
+        .discount-btn { background-color: #008000; color: white; }
+        .hidden { display: none; }
+        .scratch-box {
+            width: 80%;
+            height: 100px;
+            background: grey;
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .scratch-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: black;
+            background: white;
+            position: absolute;
+        }
+        .follow-links {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome to Our Shop</h2>
+        <script>
+            function showCurrentDateTime() {
+                let now = new Date();
+                let dateTimeString = now.toLocaleString(); // Formats date and time based on the user's locale
+                document.getElementById('current-date-time').innerText = "Date & Time: " + dateTimeString;
+            }
+        
+            // Run the function when the page loads
+            window.onload = function () {
+                showCurrentDateTime();
+                //setInterval(showCurrentDateTime, 1000); // Update every second
+            };
+        </script>
+        
+        <p id="current-date-time"></p>        
+        <button class="btn coupon-btn" onclick="getCoupon()">Get Your Coupon</button>
+        <button class="btn discount-btn" onclick="getDiscount()">Get Your Discount</button>
+        
+        <div id="coupon-section" class="hidden">
+            <div class="scratch-box" id="scratch-coupon-container">
+                <div class="scratch-content" id="scratch-coupon">BDT 0</div>
+                <canvas id="scratch-coupon-canvas"></canvas>
+            </div>
+            <p>To redeem this coupon on our cash counter, follow us:</p>
+            <div class="follow-links">
+                <a href="https://www.facebook.com" target="_blank" onclick="followedSocial('coupon', 'facebook')">Facebook</a>
+                <a href="https://www.tiktok.com" target="_blank" onclick="followedSocial('coupon', 'tiktok')">TikTok</a>
+            </div>
+            <p id="follow-status" class="hidden">Successfully followed and ready to redeem.Valid From: 399 BDT & Condition applied</p>
+            <script>
+                function showCurrentDateTime() {
+                    let now = new Date();
+                    let dateTimeString = now.toLocaleString(); // Formats date and time based on the user's locale
+                    document.getElementById('current-date-time').innerText = "Date & Time: " + dateTimeString;
+                }
+            
+                // Run the function when the page loads
+                window.onload = function () {
+                    showCurrentDateTime();
+                    setInterval(showCurrentDateTime, 1000); // Update every second
+                };
+            </script>
+            
+            <p id="current-date-time"></p>
+            
+        </div>
+        
+        <div id="discount-section" class="hidden">
+            <label for="purchase-amount">Enter Purchase Amount:</label>
+            <input type="number" id="purchase-amount" min="1" />
+            <button class="btn" onclick="generateDiscount()">Get Discount</button>
+            <div class="scratch-box" id="scratch-discount-container">
+                <div class="scratch-content" id="scratch-discount">BDT 0</div>
+                <canvas id="scratch-discount-canvas"></canvas>
+            </div>
+            <p>To redeem this discount, follow us:</p>
+            <div class="follow-links">
+                <a href="https://www.facebook.com" target="_blank" onclick="followedSocial('discount', 'facebook')">Facebook</a>
+                <a href="https://www.tiktok.com" target="_blank" onclick="followedSocial('discount', 'tiktok')">TikTok</a>
+            </div>
+            <p id="follow-status-discount" class="hidden">Successfully followed and ready to redeem.</p>
+            <p></p>
+            <script>
+                function showCurrentDateTime() {
+                    let now = new Date();
+                    let dateTimeString = now.toLocaleString(); // Formats date and time based on the user's locale
+                    document.getElementById('current-date-time').innerText = "Date & Time: " + dateTimeString;
+                }
+            
+                // Run the function when the page loads
+                window.onload = function () {
+                    showCurrentDateTime();
+                    setInterval(showCurrentDateTime, 1000); // Update every second
+                };
+            </script>
+            
+            <p id="current-date-time"></p>            
+        </div>
+    </div>
+    
+    <script>
+        let sessionToken = sessionStorage.getItem("discountToken") || generateToken();
+        sessionStorage.setItem("discountToken", sessionToken);
+        let followedCouponFacebook = false, followedCouponTikTok = false;
+        let followedDiscountFacebook = false, followedDiscountTikTok = false;
+
+        // Check if either coupon or discount has been used in this session
+        if (sessionStorage.getItem("usedCoupon") || sessionStorage.getItem("usedDiscount")) {
+            disableButtons();
+        }
+
+        function generateToken() {
+            return Math.floor(100000 + Math.random() * 900000);
+        }
+
+        function getCoupon() {
+            if (sessionStorage.getItem("usedCoupon") || sessionStorage.getItem("usedDiscount")) {
+                alert("You have already used a coupon or discount this session.");
+                return;
+            }
+            document.getElementById('coupon-section').classList.remove('hidden');
+            let discount = weightedRandom(20, 60, 0.2);
+            document.getElementById('scratch-coupon').innerText = "BDT " + discount + " (Token: " + sessionToken + ")";
+            setupScratchPad("scratch-coupon-canvas");
+        }
+
+        function getDiscount() {
+            if (sessionStorage.getItem("usedCoupon") || sessionStorage.getItem("usedDiscount")) {
+                alert("You have already used a coupon or discount this session.");
+                return;
+            }
+            document.getElementById('discount-section').classList.remove('hidden');
+        }
+
+        function generateDiscount() {
+            let amount = parseInt(document.getElementById('purchase-amount').value);
+            if (isNaN(amount) || amount <= 0) {
+                alert("Please enter a valid amount.");
+                return;
+            }
+
+            let discountRanges = [
+                { max: 1000, minD: 10, maxD: 50 },
+                { max: 1500, minD: 10, maxD: 100 },
+                { max: 2500, minD: 50, maxD: 150 },
+                { max: 3500, minD: 100, maxD: 200 },
+                { max: 5000, minD: 150, maxD: 250 },
+                { max: 8000, minD: 250, maxD: 350 },
+                { max: 12000, minD: 250, maxD: 450 },
+                { max: Infinity, minD: 300, maxD: 500 }
+            ];
+
+            let range = discountRanges.find(r => amount <= r.max);
+            let discount = weightedRandom(range.minD, range.maxD, 0.2);
+            document.getElementById('scratch-discount').innerText = "BDT " + discount + " (Token: " + sessionToken + ")";
+            setupScratchPad("scratch-discount-canvas");
+        }
+
+        function followedSocial(type, platform) {
+            if (type === 'coupon') {
+                if (platform === 'facebook') followedCouponFacebook = true;
+                if (platform === 'tiktok') followedCouponTikTok = true;
+
+                if (followedCouponFacebook && followedCouponTikTok) {
+                    document.getElementById('follow-status').classList.remove('hidden');
+                    sessionStorage.setItem("usedCoupon", "true");
+                    sessionStorage.setItem("usedDiscount", "false");
+                    disableButtons();
+                }
+            }
+
+            if (type === 'discount') {
+                if (platform === 'facebook') followedDiscountFacebook = true;
+                if (platform === 'tiktok') followedDiscountTikTok = true;
+
+                if (followedDiscountFacebook && followedDiscountTikTok) {
+                    document.getElementById('follow-status-discount').classList.remove('hidden');
+                    sessionStorage.setItem("usedDiscount", "true");
+                    sessionStorage.setItem("usedCoupon", "false");
+                    disableButtons();
+                }
+            }
+        }
+
+        function weightedRandom(min, max, bias) {
+            let randomFactor = Math.pow(Math.random(), bias);
+            return Math.floor(min + (max - min) * randomFactor);
+        }
+
+        function setupScratchPad(canvasId) {
+            let canvas = document.getElementById(canvasId);
+            let ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            ctx.fillStyle = "grey";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            let isScratching = false;
+            function scratch(e) {
+                if (!isScratching) return;
+                let rect = canvas.getBoundingClientRect();
+                let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                let y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(x, y, 20, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            canvas.addEventListener("mousedown", () => isScratching = true);
+            canvas.addEventListener("touchstart", () => isScratching = true);
+            canvas.addEventListener("mouseup", () => isScratching = false);
+            canvas.addEventListener("touchend", () => isScratching = false);
+            canvas.addEventListener("mousemove", scratch);
+            canvas.addEventListener("touchmove", scratch);
+        }
+
+        function disableButtons() {
+            document.querySelector(".coupon-btn").disabled = true;
+            document.querySelector(".discount-btn").disabled = true;
+        }
+    </script>
+</body>
+</html>

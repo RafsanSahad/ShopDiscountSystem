@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Discount & Coupon</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+            padding: 20px;
+        }
+        .btn {
+            display: block;
+            width: 80%;
+            padding: 15px;
+            margin: 10px auto;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .coupon-btn { background-color: #ff6600; color: white; }
+        .discount-btn { background-color: #008000; color: white; }
+        .hidden { display: none; }
+        .scratch-box {
+            width: 100%;
+            max-width: 300px;
+            height: 120px;
+            background: grey;
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+        .scratch-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: black;
+            background: white;
+            position: absolute;
+        }
+        .follow-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+        }
+        .follow-btn {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 10px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        .facebook-btn { background: #1877F2; }
+        .tiktok-btn { background: #000000; }
+        .confirm-btn { background: #28a745; color: white; font-size: 16px; padding: 12px; cursor: not-allowed; opacity: 0.5; }
+        .confirm-btn.active { cursor: pointer; opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome to Our Shop</h2>
+        <button class="btn coupon-btn" onclick="getCoupon()">Get Your Coupon</button>
+        <button class="btn discount-btn" onclick="getDiscount()">Get Your Discount</button>
+        
+        <!-- Coupon Section -->
+        <div id="coupon-section" class="hidden">
+            <div class="scratch-box">
+                <div class="scratch-content" id="scratch-coupon">BDT 0</div>
+                <canvas id="scratch-coupon-canvas"></canvas>
+            </div>
+            <div id="follow-section-coupon" class="follow-section hidden">
+                <p>Follow us on social media to redeem your coupon:</p>
+                <a href="https://www.facebook.com" target="_blank" class="follow-btn facebook-btn" onclick="markFollowed('facebook')">Facebook</a>
+                <a href="https://www.tiktok.com" target="_blank" class="follow-btn tiktok-btn" onclick="markFollowed('tiktok')">TikTok</a>
+                <button class="btn confirm-btn" id="confirm-follow-coupon" onclick="confirmFollow('coupon')" disabled>Confirm Follow</button>
+            </div>
+        </div>
+        
+        <!-- Discount Section -->
+        <div id="discount-section" class="hidden">
+            <label for="purchase-amount">Enter Purchase Amount:</label>
+            <input type="number" id="purchase-amount" min="1" />
+            <button class="btn" onclick="generateDiscount()">Get Discount</button>
+            <div class="scratch-box">
+                <div class="scratch-content" id="scratch-discount">BDT 0</div>
+                <canvas id="scratch-discount-canvas"></canvas>
+            </div>
+            <div id="follow-section-discount" class="follow-section hidden">
+                <p>Follow us on social media to redeem your discount:</p>
+                <a href="https://www.facebook.com" target="_blank" class="follow-btn facebook-btn" onclick="markFollowed('facebook')">Facebook</a>
+                <a href="https://www.tiktok.com" target="_blank" class="follow-btn tiktok-btn" onclick="markFollowed('tiktok')">TikTok</a>
+                <button class="btn confirm-btn" id="confirm-follow-discount" onclick="confirmFollow('discount')" disabled>Confirm Follow</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let followed = { facebook: false, tiktok: false };
+
+        function markFollowed(platform) {
+            followed[platform] = true;
+            if (followed.facebook && followed.tiktok) {
+                document.getElementById('confirm-follow-coupon').classList.add("active");
+                document.getElementById('confirm-follow-coupon').disabled = false;
+                document.getElementById('confirm-follow-discount').classList.add("active");
+                document.getElementById('confirm-follow-discount').disabled = false;
+            }
+        }
+
+        function confirmFollow(type) {
+            alert("Thank you for following! Your " + type + " has been redeemed.");
+        }
+
+        function getCoupon() {
+        let couponAmount = Math.floor(Math.random() * 41) + 20; // Random BDT 20 - 60
+        document.getElementById('scratch-coupon').innerText = "BDT " + couponAmount;
+        document.getElementById('coupon-section').classList.remove('hidden');
+        setupScratchPad("scratch-coupon-canvas", "follow-section-coupon");
+        }
+
+        function getDiscount() {
+            document.getElementById('discount-section').classList.remove('hidden');
+        }
+
+        function generateDiscount() {
+            let amount = parseInt(document.getElementById('purchase-amount').value);
+            if (isNaN(amount) || amount <= 0) {
+                alert("Please enter a valid amount.");
+                return;
+            }
+
+            let discount = Math.floor((Math.random() * 0.2 + 0.05) * amount); // 5% to 25% of amount
+            document.getElementById('scratch-discount').innerText = "BDT " + discount;
+            setupScratchPad("scratch-discount-canvas", "follow-section-discount");
+        }
+
+        function setupScratchPad(canvasId, followSectionId) {
+            let canvas = document.getElementById(canvasId);
+            let ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            ctx.fillStyle = "grey";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            let isScratching = false;
+            function scratch(e) {
+                if (!isScratching) return;
+                let rect = canvas.getBoundingClientRect();
+                let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                let y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(x, y, 20, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            canvas.addEventListener("mousedown", () => isScratching = true);
+            canvas.addEventListener("mouseup", () => isScratching = false);
+            canvas.addEventListener("mousemove", scratch);
+            setTimeout(() => document.getElementById(followSectionId).classList.remove('hidden'), 2000);
+        }
+    </script>
+</body>
+</html>

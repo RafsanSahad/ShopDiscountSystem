@@ -204,29 +204,57 @@
         }
 
         function setupScratchPad(canvasId, followSectionId) {
-            let canvas = document.getElementById(canvasId);
-            let ctx = canvas.getContext('2d');
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-            ctx.fillStyle = "grey";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        let canvas = document.getElementById(canvasId);
+        let ctx = canvas.getContext('2d');
 
-            let isScratching = false;
-            function scratch(e) {
-                if (!isScratching) return;
-                let rect = canvas.getBoundingClientRect();
-                let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-                let y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-                ctx.globalCompositeOperation = 'destination-out';
-                ctx.beginPath();
-                ctx.arc(x, y, 20, 0, Math.PI * 2);
-                ctx.fill();
-            }
+        // Ensure canvas fills the scratch box
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
 
-            canvas.addEventListener("mousedown", () => isScratching = true);
-            canvas.addEventListener("mouseup", () => isScratching = false);
-            canvas.addEventListener("mousemove", scratch);
-            setTimeout(() => document.getElementById(followSectionId).classList.remove('hidden'), 2000);
+        ctx.fillStyle = "grey";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        let isScratching = false;
+
+        function getTouchPos(e) {
+            let rect = canvas.getBoundingClientRect();
+            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function scratch(e) {
+            if (!isScratching) return;
+            e.preventDefault(); // Prevent scrolling on mobile
+            let pos = getTouchPos(e);
+
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, 20, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function startScratch(e) {
+            isScratching = true;
+            scratch(e);
+        }
+
+        function stopScratch() {
+            isScratching = false;
+        }
+
+        // Mouse Events
+        canvas.addEventListener("mousedown", startScratch);
+        canvas.addEventListener("mouseup", stopScratch);
+        canvas.addEventListener("mousemove", scratch);
+
+        // Touch Events (for mobile support)
+        canvas.addEventListener("touchstart", startScratch);
+        canvas.addEventListener("touchend", stopScratch);
+        canvas.addEventListener("touchmove", scratch);
+
+        // Show follow section after scratching for 2 seconds
+        setTimeout(() => document.getElementById(followSectionId).classList.remove('hidden'), 2000);
         }
     </script>
 </body>
